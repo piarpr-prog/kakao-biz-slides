@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>거래기반 메시지 — 업종별 기대매출</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; color: #fff;
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    padding: 28px 24px;
+  }
+  .slide { max-width: 1360px; margin: 0 auto; }
+
+  .section-label { font-size: 11px; color: #FFC200; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .slide-title   { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .slide-sub     { font-size: 12px; color: #555; margin-bottom: 14px; }
+
+  .premise {
+    background: #0d0d0d; border: 1px solid #1e1e1e; border-left: 3px solid #FFC200;
+    border-radius: 8px; padding: 11px 16px; margin-bottom: 14px;
+    font-size: 11.5px; color: #777; line-height: 1.9;
+  }
+  .premise strong { color: #FFC200; }
+  .premise em { color: #ccc; font-style: normal; }
+
+  .formula-box {
+    background: #0d0d0d; border: 1px solid #1a1a1a;
+    border-radius: 8px; padding: 12px 18px; margin-bottom: 16px;
+  }
+  .formula-title { font-size: 10px; color: #FFC200; font-weight: 700; letter-spacing: 1px; margin-bottom: 7px; }
+  .formula-eq {
+    background: #161616; border-radius: 6px; padding: 10px 14px;
+    font-size: 13px; color: #ccc; line-height: 2.1;
+  }
+  .formula-eq em  { color: #FFC200; font-style: normal; font-weight: 700; }
+  .formula-eq .arr { color: #333; margin: 0 8px; }
+  .formula-note { font-size: 11px; color: #444; margin-top: 7px; line-height: 1.8; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi { background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 10px; padding: 12px 14px; }
+  .kpi.accent { border-color: #FFC200; }
+  .kpi-lbl { font-size: 10px; color: #444; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+  .kpi-val { font-size: 19px; font-weight: 800; color: #FFC200; line-height: 1.1; margin-bottom: 2px; }
+  .kpi-sub { font-size: 10.5px; color: #444; line-height: 1.5; }
+
+  .table-wrap { overflow-x: auto; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  thead tr { background: #0a0a0a; border-bottom: 1px solid #1a1a1a; }
+  thead th { padding: 8px 10px; color: #444; font-size: 10px; font-weight: 600; text-align: right; white-space: nowrap; }
+  thead th.thl { text-align: left; }
+  thead th.thyl { color: #FFC200; }
+  .th-small { font-size: 9px; color: #333; display: block; }
+  tbody tr.dr { border-bottom: 1px solid #0d0d0d; transition: background .1s; }
+  tbody tr.dr:hover { background: #080808; }
+  tbody td { padding: 7px 10px; }
+
+  .cl  { color: #fff; font-weight: 600; text-align: left; }
+  .cn  { color: #888; text-align: right; font-variant-numeric: tabular-nums; }
+  .cnh { color: #ccc; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .cy  { color: #FFC200; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .cd  { color: #555; text-align: right; font-size: 10.5px; }
+  .pill-nf { display:inline-block; background:#1a0f00; color:#FFC200; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; }
+
+  .bar-wrap { display:flex; align-items:center; gap:5px; justify-content:flex-end; }
+  .bar-bg   { width:50px; background:#1a1a1a; border-radius:3px; height:5px; flex-shrink:0; }
+  .bar-fill { height:5px; border-radius:3px; background:#FFC200; }
+  .bar-txt  { font-size:11px; color:#FFC200; font-weight:700; min-width:48px; text-align:right; }
+
+  .tot-row td { background:#0d0d0d; padding:9px 10px; border-top:2px solid #1e1e1e; font-weight:700; }
+  .tot-row .cl { color:#fff; }
+  .tot-row .cy { font-size:14px; }
+
+  .note-bar {
+    background:#080808; border-radius:6px; padding:9px 14px;
+    font-size:10.5px; color:#333; line-height:1.9; border:1px solid #0d0d0d;
+  }
+  .note-bar strong { color:#555; }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="section-label">기대 매출 시나리오</div>
+  <div class="slide-title">업종별 거래기반 메시지 기대 매출</div>
+  <div class="slide-sub">카비센 유상 발송채널 · 순 구매자 · 순 비친구 (업종 내 중복 제거) · 2025-05~2026-05 · 단가 20원</div>
+
+  <div class="premise">
+    <strong>집계 기준</strong> &nbsp;|&nbsp;
+    발송채널: <em>adaccount_all 유상(cash_total&gt;0) 톡채널메시지</em> &nbsp;|&nbsp;
+    구매자·비친구: <em>업종 내 순 집계</em> (동일인이 같은 업종 여러 채널 구매 시 1명, 단 어느 채널에서든 비친구면 비친구) &nbsp;|&nbsp;
+    캠페인수: <em>plusfriend_send_msg distinct msg_id ÷ 12개월</em>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-title">기대 매출 계산 공식</div>
+    <div class="formula-eq">
+      연간 기대매출
+      <span class="arr">=</span>
+      <em>순 비친구 모수</em>
+      <span class="arr">×</span>
+      <em>월평균 캠페인수</em>
+      <span class="arr">×</span>
+      <em>20원</em>
+      <span class="arr">×</span>
+      <em>12개월</em>
+    </div>
+    <div class="formula-note">
+      · 순 비친구: 업종 내 unique account_id 기준 — 동일인이 여러 채널 구매 시 하나라도 비친구채널 구매자이면 비친구로 집계<br>
+      · 월평균 캠페인수: 업종 내 발송채널의 (distinct plusfriend_msg_id 합계 / 채널수 / 12개월)
+    </div>
+  </div>
+
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="thl">업종</th>
+          <th>연동채널</th>
+          <th>카비센<br>발송채널</th>
+          <th>발송비중</th>
+          <th>순 구매자<br><span class="th-small">(업종내 중복제거)</span></th>
+          <th>순 비친구<br><span class="th-small">(업종내 중복제거)</span></th>
+          <th>비친구율</th>
+          <th>월평균<br>캠페인수</th>
+          <th>단가</th>
+          <th class="thyl">월 기대매출</th>
+          <th class="thyl">연간 기대매출</th>
+        </tr>
+      </thead>
+      <tbody id="main-tbody"></tbody>
+      <tr class="tot-row">
+        <td class="cl">합계</td>
+        <td class="cn" id="t-linked">—</td>
+        <td class="cnh" id="t-biz">—</td>
+        <td class="cd" id="t-rate">—</td>
+        <td class="cn" id="t-bu">—</td>
+        <td class="cnh" id="t-nf">—</td>
+        <td id="t-nfr">—</td>
+        <td class="cd">—</td>
+        <td class="cn">20</td>
+        <td class="cy" id="t-monthly">—</td>
+        <td class="cy" id="t-annual">—</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="note-bar">
+    <strong>발송채널:</strong> adaccount_all product='톡채널메시지', cash_total&gt;0, 2025-05~2026-05 (유상 실결제) &nbsp;|&nbsp;
+    <strong>구매자:</strong> 톡스토어+체크아웃+예약하기 합산, 발송채널 한정 &nbsp;|&nbsp;
+    <strong>친구여부:</strong> tb_plusfriend_user_relation 2026-05-31 채널 단위 &nbsp;|&nbsp;
+    <strong>순 비친구:</strong> 업종 내 account_id 기준 중복 제거, 어느 채널에서든 비친구이면 비친구
+  </div>
+</div>
+
+<script>
+// 실측 데이터 (2026-06-18 최종 쿼리)
+// [업종, 연동채널, 발송채널, 발송비중%, 순구매자, 순친구, 순비친구, 비친구율%, 월평균캠페인, 연간매출]
+const DATA = [
+  ['쇼핑',              36936, 5805, 15.7, 4104771, 1336104, 2768667, 67.4, 1.1,  730928088],
+  ['외식/식음료',        23024, 3319, 14.4, 3598141, 1067648, 2530493, 70.3, 1.1,  668050152],
+  ['뷰티',               9331, 2116, 22.7, 1632471,  851242,  781229, 47.9, 1.3,  243743448],
+  ['생활',              11581, 1647, 14.2, 1157146,  471915,  685231, 59.2, 1.2,  197346528],
+  ['IT',                1982,  320, 16.1,  194891,   67896,  126995, 65.2, 3.2,   97532160],
+  ['자동차/교통',        1151,   91,  7.9,  140765,   79358,   61407, 43.6, 2.9,   42739272],
+  ['여행/레저/스포츠',  11014, 1093,  9.9,  302830,  134134,  168696, 55.7, 1.0,   40487040],
+  ['서비스',             5395,  560, 10.4,  229424,  117179,  112245, 48.9, 1.4,   37714320],
+  ['문화/엔터테인먼트',  2298,  334, 14.5,  311000,  167000,  144000, 46.3, 0.9,   31104000],
+  ['교육',               4600, 1032, 22.4,   33307,   18119,   15188, 45.6, 2.4,    8748288],
+  ['병원',               1742,  623, 35.8,   68545,   52948,   15597, 22.8, 1.8,    6737904],
+  ['미디어',              489,   53, 10.8,   11215,    7213,    4002, 35.7, 1.3,    1248624],
+  ['기관/단체',           264,   65, 24.6,    5620,    3598,    2022, 36.0, 1.9,     922032],
+  ['기타',                348,   43, 12.4,    1725,    1042,     683, 39.6, 0.7,     114744],
+  ['인물',                379,   34,  9.0,    4401,    3970,     431,  9.8, 0.4,      41376],
+];
+
+const PRICE = 20, MONTHS = 12;
+function fmt(n)       { return Math.round(n).toLocaleString('ko-KR'); }
+function fmtOk(n)     { return n >= 1e8 ? (n/1e8).toFixed(1)+'억' : n >= 1e4 ? (n/1e4).toFixed(0)+'만' : fmt(n); }
+function fmtOkFull(n) { return (n/1e8).toFixed(2)+'억'; }
+function pill(r)      { return `<span class="pill-nf">${r}%</span>`; }
+
+const maxAnnual = Math.max(...DATA.map(d => d[9]));
+
+let totLinked=0, totBiz=0, totBu=0, totNf=0, totMonthly=0;
+DATA.forEach(([, lc, bc,, bu,, nf,, camp]) => {
+  totLinked += lc; totBiz += bc; totBu += bu; totNf += nf;
+  totMonthly += nf * camp * PRICE;
+});
+const totAnnual = totMonthly * MONTHS;
+
+// KPI
+const kpiRow = document.getElementById('kpi-row');
+[
+  { lbl:'카비센 유상 발송채널', val:fmt(totBiz)+'개',      sub:'adaccount_all cash_total>0' },
+  { lbl:'순 구매자 (합산)',     val:fmt(totBu)+'명',        sub:'업종내 중복제거, 업종간 중복포함' },
+  { lbl:'순 비친구 (합산)',     val:fmt(totNf)+'명',        sub:'업종내 중복제거', accent:true },
+  { lbl:'월 기대매출',          val:fmtOk(totMonthly),      sub:'비친구 × 캠페인 × 20원', accent:true },
+  { lbl:'연간 기대매출',        val:fmtOkFull(totAnnual),   sub:'월 × 12개월', accent:true },
+].forEach(d => {
+  const el = document.createElement('div');
+  el.className = 'kpi'+(d.accent?' accent':'');
+  el.innerHTML = `<div class="kpi-lbl">${d.lbl}</div><div class="kpi-val">${d.val}</div><div class="kpi-sub">${d.sub}</div>`;
+  kpiRow.appendChild(el);
+});
+
+// 테이블
+const tbody = document.getElementById('main-tbody');
+DATA.forEach(([nm, lc, bc, rate, bu, fr, nf, nfr, camp, annual]) => {
+  const monthly = nf * camp * PRICE;
+  const barW    = Math.round(annual / maxAnnual * 100);
+  const tr = document.createElement('tr');
+  tr.className = 'dr';
+  tr.innerHTML = `
+    <td class="cl">${nm}</td>
+    <td class="cn">${fmt(lc)}</td>
+    <td class="cnh">${fmt(bc)}</td>
+    <td class="cd">${rate}%</td>
+    <td class="cn">${fmt(bu)}</td>
+    <td class="cnh">${fmt(nf)}</td>
+    <td>${pill(nfr)}</td>
+    <td class="cn">${camp.toFixed(1)}회</td>
+    <td class="cn">20</td>
+    <td class="cy">${fmt(monthly)}</td>
+    <td>
+      <div class="bar-wrap">
+        <div class="bar-bg"><div class="bar-fill" style="width:${barW}%"></div></div>
+        <span class="bar-txt">${fmtOkFull(annual)}</span>
+      </div>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// 합계
+document.getElementById('t-linked').textContent  = fmt(totLinked);
+document.getElementById('t-biz').textContent     = fmt(totBiz);
+document.getElementById('t-rate').textContent    = (totBiz/totLinked*100).toFixed(1)+'%';
+document.getElementById('t-bu').textContent      = fmt(totBu);
+document.getElementById('t-nf').textContent      = fmt(totNf);
+document.getElementById('t-nfr').innerHTML       = pill((totNf/totBu*100).toFixed(1));
+document.getElementById('t-monthly').textContent = fmt(totMonthly);
+document.getElementById('t-annual').textContent  = fmtOkFull(totAnnual);
+</script>
+</body>
+</html>

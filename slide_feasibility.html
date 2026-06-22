@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>거래기반 메시지 — 현실성 검토 & 조정 매출</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#000; color:#fff;
+    font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    padding:32px 28px; font-size:13px;
+  }
+  .wrap { max-width:1200px; margin:0 auto; }
+
+  .section-label { font-size:11px; color:#FFC200; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:4px; }
+  .slide-title   { font-size:24px; font-weight:800; margin-bottom:4px; }
+  .slide-sub     { font-size:12px; color:#aaa; margin-bottom:24px; }
+
+  .section { margin-bottom:28px; }
+  .section-head {
+    display:flex; align-items:center; gap:10px;
+    border-left:3px solid #FFC200; padding-left:12px; margin-bottom:14px;
+  }
+  .section-num   { font-size:11px; color:#FFC200; font-weight:800; letter-spacing:1px; }
+  .section-title { font-size:15px; font-weight:700; }
+
+  /* 박스 */
+  .box { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:8px; padding:14px 18px; margin-bottom:10px; }
+  .box.yl { border-left:3px solid #FFC200; }
+  .box-title { font-size:10px; color:#FFC200; font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+
+  /* KPI */
+  .kpi-row { display:grid; gap:10px; margin-bottom:14px; }
+  .kpi-3 { grid-template-columns:repeat(3,1fr); }
+  .kpi-4 { grid-template-columns:repeat(4,1fr); }
+  .kpi { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:12px 14px; }
+  .kpi.accent { border-color:#FFC200; }
+  .kpi.dim    { border-color:#333; }
+  .kpi-lbl { font-size:10px; color:#999; font-weight:700; letter-spacing:1px; margin-bottom:4px; }
+  .kpi-val { font-size:22px; font-weight:800; color:#FFC200; line-height:1.1; margin-bottom:3px; }
+  .kpi-val.grey { color:#888; }
+  .kpi-val.green { color:#69db7c; }
+  .kpi-sub { font-size:10.5px; color:#aaa; line-height:1.5; }
+
+  /* 공통 테이블 */
+  .table-wrap { overflow-x:auto; margin-bottom:10px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  thead tr { background:#0a0a0a; border-bottom:1px solid #1a1a1a; }
+  thead th { padding:8px 10px; color:#aaa; font-size:10.5px; font-weight:600; text-align:right; white-space:nowrap; }
+  thead th.thl { text-align:left; }
+  thead th.thyl { color:#FFC200; }
+  tbody tr { border-bottom:1px solid #0d0d0d; transition:background .1s; }
+  tbody tr:hover { background:#080808; }
+  tbody tr.excl { opacity:.45; }
+  tbody td { padding:8px 10px; color:#bbb; }
+  .cl { color:#fff; font-weight:600; text-align:left; }
+  .cn { color:#aaa; text-align:right; font-variant-numeric:tabular-nums; }
+  .cy { color:#FFC200; font-weight:700; text-align:right; }
+  .cd { color:#999; text-align:right; font-size:10.5px; }
+  .tag-excl { display:inline-block; background:#1a0a0a; color:#ff6b6b; font-size:9px; padding:1px 5px; border-radius:4px; margin-left:4px; }
+  .tag-ok   { display:inline-block; background:#0a1a0a; color:#69db7c; font-size:9px; padding:1px 5px; border-radius:4px; margin-left:4px; }
+  .pill-nf  { display:inline-block; background:#1a0f00; color:#FFC200; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; }
+  .tot-row td { background:#0d0d0d; padding:8px 10px; border-top:2px solid #1e1e1e; font-weight:700; }
+  .tot-row .cl { color:#fff; }
+  .tot-row .cy { font-size:13px; }
+
+  /* 모수 비교 플로우 */
+  .flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .flow-box {
+    background:#111; border:1px solid #1a1a1a; border-radius:8px;
+    padding:10px 14px; text-align:center; min-width:120px;
+  }
+  .flow-box .fb-val { font-size:18px; font-weight:800; color:#FFC200; }
+  .flow-box .fb-val.grey { color:#888; }
+  .flow-box .fb-lbl { font-size:10px; color:#aaa; margin-top:2px; }
+  .flow-arrow { color:#666; font-size:18px; flex-shrink:0; }
+  .flow-minus { background:#1a0a0a; border-color:#ff6b6b33; }
+  .flow-minus .fb-val { color:#ff8787; }
+
+  /* 시나리오 */
+  .sc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:14px; }
+  .sc-card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:16px 18px; }
+  .sc-card.base { border-color:#333; }
+  .sc-card.mid  { border-color:#FFC200; }
+  .sc-card.opt  { border-color:#69db7c; }
+  .sc-lbl { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:6px; }
+  .sc-lbl.c-base { color:#aaa; }
+  .sc-lbl.c-mid  { color:#FFC200; }
+  .sc-lbl.c-opt  { color:#69db7c; }
+  .sc-before { font-size:13px; color:#777; text-decoration:line-through; margin-bottom:2px; }
+  .sc-after  { font-size:28px; font-weight:800; margin-bottom:4px; }
+  .sc-after.c-base { color:#bbb; }
+  .sc-after.c-mid  { color:#FFC200; }
+  .sc-after.c-opt  { color:#69db7c; }
+  .sc-sub { font-size:11px; color:#aaa; margin-bottom:10px; }
+  .sc-detail { font-size:11px; color:#bbb; line-height:1.9; }
+  .sc-detail em { color:#FFC200; font-style:normal; font-weight:700; }
+
+  .note-bar {
+    background:#080808; border-radius:6px; padding:9px 14px;
+    font-size:10.5px; color:#555; line-height:1.9; border:1px solid #111;
+  }
+  .note-bar strong { color:#aaa; }
+  hr.div { border:none; border-top:1px solid #111; margin:24px 0; }
+
+  /* 추가 클래스 */
+  .kpi-val-red   { font-size:22px; font-weight:800; color:#ff8787; line-height:1.1; margin-bottom:3px; }
+  .fb-val-yellow { font-size:18px; font-weight:800; color:#FFC200; }
+  .flow-box-yl   { border-color:#FFC200; }
+  .formula-box-sc { margin-bottom:16px; font-size:12px; color:#aaa; line-height:2; }
+  .box-hl        { border-color:#FFC200; }
+  .kpi-row-mt    { margin-top:14px; }
+  .lbl-section   { margin-bottom:10px; font-size:10px; color:#999; font-weight:700; letter-spacing:1px; }
+  .em-yellow     { color:#FFC200; }
+  .sc-em-grey    { color:#888; font-style:normal; font-weight:700; }
+  .sc-em-green   { color:#69db7c; font-style:normal; font-weight:700; }
+  .tag-delta     { color:#888; font-size:10px; }
+  .store-note    { margin-top:8px; font-size:11px; color:#aaa; }
+  .box-mb12      { margin-bottom:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="section-label">거래기반 메시지 — 현실성 검토</div>
+  <div class="slide-title">비친구 발송 현실성 검토 & 조정 매출 시나리오</div>
+  <div class="slide-sub">체크아웃·예약하기 비친구 모수 조정 근거 및 수정된 기대매출</div>
+
+  <!-- ══ SECTION 1: 체크아웃 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <span class="section-title">톡체크아웃 — 비친구 모수 현실성</span>
+    </div>
+
+    <div class="kpi-row kpi-4">
+      <div class="kpi">
+        <div class="kpi-lbl">비친구 (742만 기준)</div>
+        <div class="kpi-val">102.3만명</div>
+        <div class="kpi-sub">전체 742만 중 체크아웃 비중(13.8%)</div>
+      </div>
+      <div class="kpi dim">
+        <div class="kpi-lbl">D+1 동일채널 차단 제외</div>
+        <div class="kpi-val-red">-3.6만명</div>
+        <div class="kpi-sub">3.5% 차단율 적용</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">조정 후 비친구 모수</div>
+        <div class="kpi-val">98.7만명</div>
+        <div class="kpi-sub">D+1 차단자 3.6만명 제외</div>
+      </div>
+    </div>
+
+    <div class="box yl">
+      <div class="box-title">제외 근거 — D+1 이내 동일 채널 차단/삭제</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="thl">구분</th>
+            <th>수치</th>
+            <th>비율</th>
+            <th class="thl">의미</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="cl">원래 비친구 모수</td>
+              <td class="cn">1,022,880명</td>
+              <td class="cn">100%</td>
+              <td class="cd">742만 기준 체크아웃 비중(13.8%) 적용</td>
+            </tr>
+            <tr>
+              <td class="cl">채널 기능 인지자 <span class="tag-ok">참고</span></td>
+              <td class="cn">1,011,827명</td>
+              <td class="cn">98.9%</td>
+              <td class="cd">다른 채널 친구 보유 — 기능 알면서 추가 안 함</td>
+            </tr>
+            <tr>
+              <td class="cl">D+1 이내 동일 채널 차단/삭제 <span class="tag-excl">제외</span></td>
+              <td class="cy">-36,105명</td>
+              <td class="cy">-3.5%</td>
+              <td class="cd">구매 직후 해당 채널 명시적 거부</td>
+            </tr>
+            <tr class="tot-row">
+              <td class="cl">조정 후 발송 가능 모수</td>
+              <td class="cy">986,775명</td>
+              <td class="cy">96.5%</td>
+              <td class="cd">실제 발송 대상</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 1-B: 톡스토어 추가 ══ -->
+  <!-- 스토어 업종 검토 결과 포함 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">01-B</span>
+      <span class="section-title">톡스토어 — 비친구 모수 현실성</span>
+    </div>
+    <div class="kpi-row kpi-3">
+      <div class="kpi">
+        <div class="kpi-lbl">원래 비친구 (742만 기준)</div>
+        <div class="kpi-val grey">573.5만명</div>
+        <div class="kpi-sub">742만 중 스토어 비중(77.3%) 적용</div>
+      </div>
+      <div class="kpi dim">
+        <div class="kpi-lbl">D+1 동일채널 차단/삭제 제외</div>
+        <div class="kpi-val-red">-43.9만명</div>
+        <div class="kpi-sub">7.7% — 구매 직후 채널 명시적 거부</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">조정 후 비친구 모수</div>
+        <div class="kpi-val">529.6만명</div>
+        <div class="kpi-sub">스토어 최종 발송 가능 모수 (92.3%)</div>
+      </div>
+    </div>
+
+    <div class="box yl">
+      <div class="box-title">톡스토어 업종(category_1)별 검토 — 제외 업종 없음</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="thl">카테고리</th><th>비친구 구매자</th><th>D+1 차단율</th><th>판단</th><th class="thl">비고</th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="cl">생활</td><td class="cn">391,899명</td><td class="cn">2.2%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">일상 소비재, 재구매 주기 명확</td></tr>
+            <tr><td class="cl">식품</td><td class="cn">316,883명</td><td class="cn">4.4%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">소비 후 재구매 패턴 강함</td></tr>
+            <tr><td class="cl">패션의류</td><td class="cn">298,521명</td><td class="cn">3.9%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">시즌별 신상 알림 적합</td></tr>
+            <tr><td class="cl">뷰티</td><td class="cn">269,397명</td><td class="cn">3.6%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">재구매 주기 명확 (1~2개월)</td></tr>
+            <tr><td class="cl">패션잡화</td><td class="cn">120,209명</td><td class="cn">1.8%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">—</td></tr>
+            <tr><td class="cl">인테리어</td><td class="cn">118,005명</td><td class="cn">3.2%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">계절/이사 수요 기반</td></tr>
+            <tr><td class="cl">디지털/가전</td><td class="cn">70,706명</td><td class="cn">2.6%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">신제품 출시 알림 적합</td></tr>
+            <tr><td class="cl">스포츠/레저</td><td class="cn">66,834명</td><td class="cn">1.3%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">차단율 가장 낮음</td></tr>
+            <tr><td class="cl">출산/유아동</td><td class="cn">5,000명</td><td class="cn">2.5%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">성장 주기 기반 재구매</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="store-note">
+        ✅ 톡스토어는 예약하기와 달리 민감 업종(병원·숙박·편의점) 없음 — <strong>전 카테고리 발송 가능</strong>.
+        D+1 차단율은 1.3~4.4% 수준으로 체크아웃(3.5%)과 유사. 단, <strong>식품(4.4%)·패션의류(3.9%)</strong>가 상대적으로 높아 메시지 빈도 과다 주의.
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ══ SECTION 2: 예약하기 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <span class="section-title">톡예약하기 — 비친구 모수 현실성</span>
+    </div>
+
+    <div class="kpi-row kpi-4">
+      <div class="kpi">
+        <div class="kpi-lbl">전체 비친구 (742만 기준)</div>
+        <div class="kpi-val grey">65.9만명</div>
+        <div class="kpi-sub">742만 중 예약 비중(8.9%) 적용</div>
+      </div>
+      <div class="kpi dim">
+        <div class="kpi-lbl">부적절업종 제외</div>
+        <div class="kpi-val-red">-14.7만명</div>
+        <div class="kpi-sub">모텔·호텔·편의점·배달 (22.3%)<br>펜션·리조트는 발송가능으로 전환</div>
+      </div>
+      <div class="kpi dim">
+        <div class="kpi-lbl">민감업종 + D+1차단 제외</div>
+        <div class="kpi-val-red">-0.9만명</div>
+        <div class="kpi-sub">내과·산부인과·소아청소년과 등 + D+1 차단</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">조정 후 비친구 모수</div>
+        <div class="kpi-val">50.3만명</div>
+        <div class="kpi-sub">742만 기준 발송 가능 업종 (76.4%)</div>
+      </div>
+    </div>
+
+    <div class="box yl">
+      <div class="box-title">업종별 비친구 현황 — 발송 가능/제외 분류</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="thl">업종(business_type)</th>
+            <th class="thl">대표 카테고리</th>
+            <th>비친구</th>
+            <th>D+1 차단율</th>
+            <th>제외 여부</th>
+            <th class="thl">제외 사유</th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="cl">공연·전시·티켓</td><td class="cd">전시·팝업스토어·뮤지컬·워터파크</td><td class="cn">270,077명</td><td class="cn">0.7%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">재방문 기대, 민감정보 없음</td></tr>
+            <tr class="excl"><td class="cl">숙박 (모텔+호텔) <span class="tag-excl">제외</span></td><td class="cd">모텔·호텔</td><td class="cn">125,777명</td><td class="cn">0.4%</td><td><span class="tag-excl">제외</span></td><td class="cd">민감 숙박 — 노출 우려, 재방문 불규칙</td></tr>
+            <tr><td class="cl">숙박 (펜션+리조트 등)</td><td class="cd">펜션·리조트·게스트하우스·글램핑</td><td class="cn">35,705명</td><td class="cn">0.3%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">일반 숙박 — 시즌 재방문 기대</td></tr>
+            <tr><td class="cl">식당·외식</td><td class="cd">한식·뷔페·스테이크·외식</td><td class="cn">63,898명</td><td class="cn">0.6%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">재방문 주기 명확</td></tr>
+            <tr><td class="cl">병원 (일반진료과 제외)</td><td class="cd">피부과·한의원·치과·정형외과</td><td class="cn">24,315명</td><td class="cn">1.3%</td><td><span class="tag-ok">피부과·한의원 가능</span></td><td class="cd">내과·산부인과·소아청소년과 등 민감과목 제외</td></tr>
+            <tr><td class="cl">기타</td><td class="cd">스타일링·기타</td><td class="cn">33,104명</td><td class="cn">0.8%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">—</td></tr>
+            <tr class="excl"><td class="cl">편의점·배달 <span class="tag-excl">제외</span></td><td class="cd">CU·GS25·세븐일레븐·배달</td><td class="cn">21,028명</td><td class="cn">1.4%</td><td><span class="tag-excl">제외</span></td><td class="cd">단발성 거래, 마케팅 부적합</td></tr>
+            <tr><td class="cl">뷰티·헤어</td><td class="cd">헤어샵·네일·뷰티</td><td class="cn">1,258명</td><td class="cn">1.2%</td><td><span class="tag-ok">발송가능</span></td><td class="cd">재방문 주기 명확</td></tr>
+            <tr class="tot-row">
+              <td class="cl" colspan="2">발송가능 합계</td>
+              <td class="cy">502,954명</td><td class="cd">—</td>
+              <td><span class="tag-ok">발송가능</span></td>
+              <td class="cd">742만 기준 76.4% (펜션·리조트 포함)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">병원 하위 업종별 D+1 친구추가 미동의율 (민감업종 제외 근거)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="thl">하위 업종</th><th>구매자</th><th>미동의율</th><th>제외 여부</th>
+          </tr></thead>
+          <tbody>
+            <tr class="excl"><td class="cl">내과+산부인과</td><td class="cn">145명</td><td class="cy">100.0%</td><td><span class="tag-excl">제외</span></td></tr>
+            <tr class="excl"><td class="cl">피부과+성형외과</td><td class="cn">840명</td><td class="cy">85.1%</td><td><span class="tag-excl">제외</span></td></tr>
+            <tr class="excl"><td class="cl">소아청소년과</td><td class="cn">2,677명</td><td class="cy">79.2%</td><td><span class="tag-excl">제외</span></td></tr>
+            <tr class="excl"><td class="cl">산부인과+외과</td><td class="cn">208명</td><td class="cy">78.4%</td><td><span class="tag-excl">제외</span></td></tr>
+            <tr class="excl"><td class="cl">가정의학과</td><td class="cn">492명</td><td class="cy">74.6%</td><td><span class="tag-excl">제외</span></td></tr>
+            <tr class="excl"><td class="cl">성형외과</td><td class="cn">1,253명</td><td class="cy">73.0%</td><td><span class="tag-excl">제외</span></td></tr>
+            <tr><td class="cl">피부과</td><td class="cn">37,973명</td><td class="cn">73.5%</td><td><span class="tag-ok">발송가능</span></td></tr>
+            <tr><td class="cl">한의원</td><td class="cn">4,744명</td><td class="cn">60.8%</td><td><span class="tag-ok">발송가능</span></td></tr>
+            <tr><td class="cl">정형외과</td><td class="cn">2,062명</td><td class="cn">60.0%</td><td><span class="tag-ok">발송가능</span></td></tr>
+            <tr><td class="cl">치과</td><td class="cn">1,284명</td><td class="cn">65.9%</td><td><span class="tag-ok">발송가능</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ══ SECTION 3: 조정 후 모수 비교 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <span class="section-title">조정 전·후 비친구 모수 비교</span>
+    </div>
+
+    <!-- 스토어 플로우 -->
+    <div class="lbl-section">톡스토어</div>
+    <div class="flow">
+      <div class="flow-box">
+        <div class="fb-val grey">5,735,096명</div>
+        <div class="fb-lbl">원래 비친구 (742만 기준)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-minus">
+        <div class="fb-val">-439,465명</div>
+        <div class="fb-lbl">D+1 채널 차단 (7.7%)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-box-yl">
+        <div class="fb-val-yellow">5,295,631명</div>
+        <div class="fb-lbl">조정 후 모수 (529.6만)</div>
+      </div>
+    </div>
+
+    <!-- 체크아웃 플로우 -->
+    <div class="lbl-section">체크아웃</div>
+    <div class="flow">
+      <div class="flow-box">
+        <div class="fb-val grey">1,022,880명</div>
+        <div class="fb-lbl">원래 비친구 (742만 기준)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-minus">
+        <div class="fb-val">-36,105명</div>
+        <div class="fb-lbl">D+1 채널 차단 (3.5%)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-box-yl">
+        <div class="fb-val-yellow">986,775명</div>
+        <div class="fb-lbl">조정 후 모수 (98.7만)</div>
+      </div>
+    </div>
+
+    <!-- 예약 플로우 -->
+    <div class="lbl-section">예약하기</div>
+    <div class="flow">
+      <div class="flow-box">
+        <div class="fb-val grey">658,910명</div>
+        <div class="fb-lbl">원래 비친구 (742만 기준)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-minus">
+        <div class="fb-val">-125,777명</div>
+        <div class="fb-lbl">모텔+호텔 제외</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-minus">
+        <div class="fb-val">-21,028명</div>
+        <div class="fb-lbl">편의점·배달 제외</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-minus">
+        <div class="fb-val">-4,626명</div>
+        <div class="fb-lbl">민감업종</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-minus">
+        <div class="fb-val">-4,525명</div>
+        <div class="fb-lbl">D+1 차단</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-box-yl">
+        <div class="fb-val-yellow">502,954명</div>
+        <div class="fb-lbl">조정 후 모수 (50.3만)</div>
+      </div>
+    </div>
+
+    <!-- 전체 요약 -->
+    <div class="kpi-row kpi-3 kpi-row-mt">
+      <div class="kpi dim">
+        <div class="kpi-lbl">기본 비친구 모수</div>
+        <div class="kpi-val grey">742만명</div>
+        <div class="kpi-sub">업종별 비친구 합산 (카비센 발송 17,134채널)</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">섹션03 조정 후 합산</div>
+        <div class="kpi-val">678.6만명</div>
+        <div class="kpi-sub">스토어 529.6 + 체크아웃 98.7 + 예약 50.3만</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">감소분</div>
+        <div class="kpi-val grey">-63.4만명</div>
+        <div class="kpi-sub">-8.5% (스토어 D+1 차단 영향 큼)</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ══ SECTION 4: 추가 제외 모수 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <span class="section-title">추가 제외 모수 — 발송 불가/부적합 상황별</span>
+    </div>
+
+    <div class="box yl box-mb12">
+      <div class="box-title">추가 제외 항목 요약</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="thl">항목</th>
+            <th>섹션03 후 기준 제외</th>
+            <th>비율</th>
+            <th>데이터 기준</th>
+            <th class="thl">비고</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="cl">① 080 수신거부 등록자</td>
+              <td class="cy">67,263명</td>
+              <td class="cn">~1%</td>
+              <td><span class="tag-excl">추정</span></td>
+              <td class="cd">발송은 되나 실제 도달 안 됨 · 플랫폼 자동 필터 처리 · 672.6만 × 1% 적용 · 별도 080 DB 관리 (실측 경로 없음)</td>
+            </tr>
+            <tr>
+              <td class="cl">② 중복 채널 발송 대상</td>
+              <td class="cy">2,482,365명</td>
+              <td class="cn">36.9%</td>
+              <td><span class="tag-ok">실측</span></td>
+              <td class="cd">742만 중복 275만 × 섹션03 잔존율(91.5%) 적용 · 채널당 평균 5.8개 · unique 비친구만 남기기 위한 제외</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="kpi-row kpi-3">
+      <div class="kpi dim">
+        <div class="kpi-lbl">② 중복 제외 (실측)</div>
+        <div class="kpi-val-red">-251.6만명</div>
+        <div class="kpi-sub">업종 간 중복 275만 × 섹션03 잔존율</div>
+      </div>
+      <div class="kpi dim">
+        <div class="kpi-lbl">① 080 수신거부 (추정 1%)</div>
+        <div class="kpi-val-red">-6.8만명</div>
+        <div class="kpi-sub">678.6만 × 1% · 별도 실측 경로 없음</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">섹션04 후 최종 발송 가능 모수</div>
+        <div class="kpi-val">420.2만명</div>
+        <div class="kpi-sub">678.6 - 251.6 - 6.8만 = 420.2만</div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">② 중복 채널 발송 — 상세 현황 (실측)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="thl">구분</th><th>수치</th><th>비율</th><th class="thl">의미</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="cl">비친구 전체</td>
+              <td class="cn">4,679,650명</td><td class="cn">100%</td>
+              <td class="cd">adaccount 발송채널 기준 unique 비친구</td>
+            </tr>
+            <tr>
+              <td class="cl">단일 채널 구매 (중복 없음)</td>
+              <td class="cn">1,529,970명</td><td class="cn">32.7%</td>
+              <td class="cd">1개 채널에서만 구매 → 중복 발송 없음</td>
+            </tr>
+            <tr>
+              <td class="cl">복수 채널 구매 <span class="tag-excl">중복 제어 필요</span></td>
+              <td class="cy">3,149,680명</td><td class="cy">67.3%</td>
+              <td class="cd">평균 5.8개 채널 → 동일인에 여러 채널이 발송</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="store-note">
+        ✅ 중복 발송은 <strong>발송 불가</strong>가 아니라 <strong>플랫폼 시스템 처리</strong> 문제.
+        account_id 기준 채널 간 발송 중복 제어 로직이 없으면 동일인이 여러 채널에서 메시지를 받아 스팸 인식 → 차단율 급증 위험.
+        <strong>Phase 1 출시 전 반드시 중복 발송 방지 스펙 검토 필요.</strong>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ══ SECTION 5: 조정 매출 시나리오 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <span class="section-title">조정된 비친구 모수 기반 기대매출 시나리오</span>
+    </div>
+
+    <div class="box formula-box-sc">
+      <div class="box-title">계산 공식 (조정 후)</div>
+      최종 발송 가능 모수 <strong class="em-yellow">420.2만명</strong>
+      × TTL 6개월(×0.62) = <strong class="em-yellow">260만명</strong>
+      × 동일재화 조건 × 차단율(×0.966) × 월캠페인수 × 20원 × 12개월
+    </div>
+
+    <div class="sc-grid">
+      <!-- 보수 -->
+      <div class="sc-card base">
+        <div class="sc-lbl c-base">▸ 보수적 시나리오</div>
+        <div class="sc-before">기존 약 6억</div>
+        <div class="sc-after c-base">약 3.4억</div>
+        <div class="sc-sub">발송빈도 0.8회/월 · 동일재화 70%</div>
+        <div class="sc-detail">
+          최종 모수: <em>420.2만명</em><br>
+          × TTL(×0.62): <em>260만</em><br>
+          × 동일재화(×0.70): <em>182만</em><br>
+          × 차단율(×0.966): <em>176만</em><br>
+          × 0.8회 × 20원 × 12개월<br>
+          = <em class="sc-em-grey">약 3.4억</em>
+        </div>
+      </div>
+
+      <!-- 중간 -->
+      <div class="sc-card mid">
+        <div class="sc-lbl c-mid">▸ 중간 시나리오</div>
+        <div class="sc-before">기존 약 8억</div>
+        <div class="sc-after c-mid">약 4.5억</div>
+        <div class="sc-sub">발송빈도 1.0회/월 · 동일재화 75%</div>
+        <div class="sc-detail">
+          최종 모수: <em>420.2만명</em><br>
+          × TTL(×0.62): <em>260만</em><br>
+          × 동일재화(×0.75): <em>195만</em><br>
+          × 차단율(×0.966): <em>188만</em><br>
+          × 1.0회 × 20원 × 12개월<br>
+          = <em>약 4.5억</em>
+        </div>
+      </div>
+
+      <!-- 낙관 -->
+      <div class="sc-card opt">
+        <div class="sc-lbl c-opt">▸ 낙관 시나리오</div>
+        <div class="sc-before">기존 약 10.2억</div>
+        <div class="sc-after c-opt">약 5.8억</div>
+        <div class="sc-sub">발송빈도 1.2회/월 · 동일재화 80%</div>
+        <div class="sc-detail">
+          최종 모수: <em>420.2만명</em><br>
+          × TTL(×0.62): <em>260만</em><br>
+          × 동일재화(×0.80): <em>208만</em><br>
+          × 차단율(×0.966): <em>201만</em><br>
+          × 1.2회 × 20원 × 12개월<br>
+          = <em class="sc-em-green">약 5.8억</em>
+        </div>
+      </div>
+    </div>
+
+    <!-- 요약 비교 테이블 -->
+    <div class="box box-hl">
+      <div class="box-title">기존 vs 조정 후 시나리오 비교</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="thl">구분</th>
+            <th>비친구 모수</th>
+            <th>TTL 적용</th>
+            <th>동일재화</th>
+            <th>발송빈도</th>
+            <th class="thyl">기존 매출</th>
+            <th class="thyl">조정 매출</th>
+            <th>변화</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="cl">보수적</td>
+              <td class="cn">420.2만 <span class="tag-delta">(↓321.8만)</span></td>
+              <td class="cn">62%</td><td class="cn">70%</td><td class="cn">0.8회</td>
+              <td class="cn">약 6.0억</td>
+              <td class="cy">약 3.4억</td>
+              <td class="cd">-2.6억</td>
+            </tr>
+            <tr>
+              <td class="cl">중간</td>
+              <td class="cn">420.2만</td>
+              <td class="cn">62%</td><td class="cn">75%</td><td class="cn">1.0회</td>
+              <td class="cn">약 8.0억</td>
+              <td class="cy">약 4.5억</td>
+              <td class="cd">-3.5억</td>
+            </tr>
+            <tr>
+              <td class="cl">낙관</td>
+              <td class="cn">420.2만</td>
+              <td class="cn">62%</td><td class="cn">80%</td><td class="cn">1.2회</td>
+              <td class="cn">약 10.2억</td>
+              <td class="cy">약 5.8억</td>
+              <td class="cd">-4.4억</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-bar">
+    <strong>스토어 조정:</strong> 573.5만(742만 기준) → D+1 차단 43.9만(7.7%) 제외 → 529.6만 &nbsp;|&nbsp;
+    <strong>체크아웃 조정:</strong> 102.3만(742만 기준) → D+1 차단 3.6만(3.5%) 제외 → 98.7만 &nbsp;|&nbsp;
+    <strong>예약 조정:</strong> 모텔+호텔 125,777 + 편의점·배달 21,028 + 민감업종 4,626 + D+1차단 4,525명 제외 → 50.3만명 (742만 기준) &nbsp;|&nbsp;
+    <strong>숙박:</strong> 펜션·리조트·게스트하우스 35,705명 발송가능으로 전환 &nbsp;|&nbsp;
+    <strong>기간:</strong> 2025-05~2026-05
+  </div>
+
+</div>
+</body>
+</html>

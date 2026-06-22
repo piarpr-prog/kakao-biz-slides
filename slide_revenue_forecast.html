@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>거래기반 메시지 — 매출 추정 근거</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#000; color:#fff;
+    font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    padding:32px 28px; font-size:13px;
+  }
+  .wrap { max-width:1200px; margin:0 auto; }
+
+  /* 헤더 */
+  .section-label { font-size:11px; color:#FFC200; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:4px; }
+  .slide-title   { font-size:26px; font-weight:800; margin-bottom:4px; }
+  .slide-sub     { font-size:12px; color:#aaa; margin-bottom:24px; }
+
+  /* 섹션 */
+  .section { margin-bottom:32px; }
+  .section-head {
+    display:flex; align-items:center; gap:10px;
+    border-left:3px solid #FFC200; padding-left:12px;
+    margin-bottom:14px;
+  }
+  .section-num { font-size:11px; color:#FFC200; font-weight:800; letter-spacing:1px; }
+  .section-title { font-size:16px; font-weight:700; }
+  .section-badge {
+    font-size:10px; background:#1a0f00; color:#FFC200;
+    padding:2px 8px; border-radius:10px; font-weight:700;
+  }
+
+  /* 박스 */
+  .box {
+    background:#0d0d0d; border:1px solid #1a1a1a; border-radius:8px;
+    padding:14px 18px; margin-bottom:10px;
+  }
+  .box.highlight { border-color:#FFC200; }
+  .box-title { font-size:11px; color:#FFC200; font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+
+  /* KPI 카드 */
+  .kpi-row { display:grid; gap:10px; margin-bottom:14px; }
+  .kpi-3 { grid-template-columns:repeat(3,1fr); }
+  .kpi-4 { grid-template-columns:repeat(4,1fr); }
+  .kpi-5 { grid-template-columns:repeat(5,1fr); }
+  .kpi { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:12px 14px; }
+  .kpi.accent { border-color:#FFC200; }
+  .kpi-lbl { font-size:10px; color:#999; font-weight:700; letter-spacing:1px; margin-bottom:4px; }
+  .kpi-val { font-size:22px; font-weight:800; color:#FFC200; line-height:1.1; margin-bottom:3px; }
+  .kpi-sub { font-size:10.5px; color:#aaa; line-height:1.5; }
+
+  /* 팩트 리스트 */
+  .fact-list { list-style:none; }
+  .fact-list li {
+    display:flex; gap:10px; align-items:flex-start;
+    padding:7px 0; border-bottom:1px solid #111; font-size:12px; color:#ccc; line-height:1.7;
+  }
+  .fact-list li:last-child { border-bottom:none; }
+  .fact-icon { color:#FFC200; font-weight:700; flex-shrink:0; font-size:13px; }
+  .fact-list em { color:#FFC200; font-style:normal; font-weight:700; }
+  .fact-list .src { color:#444; font-size:10.5px; }
+
+  /* 감소요인 테이블 */
+  .factor-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .factor-table thead tr { background:#0a0a0a; border-bottom:1px solid #1a1a1a; }
+  .factor-table thead th { padding:8px 12px; color:#aaa; font-size:10.5px; font-weight:600; text-align:left; }
+  .factor-table tbody tr { border-bottom:1px solid #0f0f0f; transition:background .1s; }
+  .factor-table tbody tr:hover { background:#080808; }
+  .factor-table tbody td { padding:9px 12px; color:#bbb; vertical-align:top; line-height:1.7; }
+  .factor-table td.factor-name { color:#fff; font-weight:600; white-space:nowrap; }
+  .factor-table td.factor-val  { color:#FFC200; font-weight:700; white-space:nowrap; font-size:13px; }
+  .factor-table td.factor-base { color:#FFC200; }
+  .tag-data { display:inline-block; background:#0a1a0a; color:#69db7c; font-size:9px; padding:1px 5px; border-radius:4px; margin-left:4px; }
+  .tag-est  { display:inline-block; background:#1a1a0a; color:#aaa; font-size:9px; padding:1px 5px; border-radius:4px; margin-left:4px; }
+
+  /* 시나리오 */
+  .scenario-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px; }
+  .scenario-card {
+    background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px;
+    padding:16px 18px;
+  }
+  .scenario-card.base { border-color:#333; }
+  .scenario-card.mid  { border-color:#FFC200; }
+  .scenario-card.opt  { border-color:#69db7c; }
+  .sc-label { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+  .sc-label.c-base { color:#888; }
+  .sc-label.c-mid  { color:#FFC200; }
+  .sc-label.c-opt  { color:#69db7c; }
+  .sc-val { font-size:30px; font-weight:800; margin-bottom:4px; }
+  .sc-val.c-base { color:#888; }
+  .sc-val.c-mid  { color:#FFC200; }
+  .sc-val.c-opt  { color:#69db7c; }
+  .sc-sub { font-size:11px; color:#aaa; margin-bottom:12px; }
+  .sc-detail { font-size:11px; color:#bbb; line-height:1.9; }
+  .sc-detail em { color:#fff; font-style:normal; }
+
+  /* 계산식 */
+  .calc-chain {
+    background:#111; border-radius:6px; padding:10px 14px;
+    font-size:12px; color:#bbb; line-height:2; font-family:'SF Mono',Menlo,monospace;
+  }
+  .calc-chain em  { color:#FFC200; font-style:normal; font-weight:700; }
+  .calc-chain .op { color:#333; margin:0 6px; }
+  .calc-chain .result { color:#FFC200; font-size:14px; font-weight:800; }
+
+  /* 템플릿 카드 */
+  .template-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px; }
+  .tpl-card {
+    background:#0d0d0d; border:1px solid #1a1a1a; border-radius:8px; padding:12px 14px;
+  }
+  .tpl-num  { font-size:10px; color:#FFC200; font-weight:700; margin-bottom:5px; }
+  .tpl-name { font-size:13px; font-weight:700; color:#fff; margin-bottom:4px; }
+  .tpl-time { font-size:11px; color:#888; margin-bottom:6px; }
+  .tpl-desc { font-size:11px; color:#bbb; line-height:1.7; }
+  .tpl-ind  { font-size:10px; color:#888; margin-top:5px; }
+  .tpl-freq { display:inline-block; background:#1a0f00; color:#FFC200; font-size:10px; padding:1px 6px; border-radius:8px; }
+
+  /* 주석 */
+  .note-bar {
+    background:#080808; border-radius:6px; padding:9px 14px;
+    font-size:10.5px; color:#777; line-height:1.9; border:1px solid #1a1a1a;
+    margin-top:14px;
+  }
+  .note-bar strong { color:#aaa; }
+
+  hr.sec-div { border:none; border-top:1px solid #111; margin:28px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="section-label">거래기반 메시지 기획안</div>
+  <div class="slide-title">기대 매출 추정 — 근거 및 시나리오</div>
+  <div class="slide-sub">실측 데이터 기반 · 2025-05~2026-05 기준 · 3개 서비스 연동 + 카비센 유상 발송채널 17,134개</div>
+
+  <!-- ══ 베이스라인 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">BASE</span>
+      <span class="section-title">베이스라인 매출</span>
+      <span class="section-badge">실측</span>
+    </div>
+
+    <div class="kpi-row kpi-4">
+      <div class="kpi accent">
+        <div class="kpi-lbl">카비센 유상 발송채널</div>
+        <div class="kpi-val">17,134개</div>
+        <div class="kpi-sub">3개 서비스 연동 + 채널메시지 유상 (전체 87,009개 중)<br>product='톡채널메시지' cash_total&gt;0</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">순 비친구 모수</div>
+        <div class="kpi-val">742만명</div>
+        <div class="kpi-sub">업종 내 중복 제거<br>발송채널 구매자 기준</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">월평균 캠페인수</div>
+        <div class="kpi-val">1.2회</div>
+        <div class="kpi-sub">distinct msg_id ÷ 채널수 ÷ 12<br>카비센 실측 평균</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-lbl">베이스 연간 매출</div>
+        <div class="kpi-val">~21억</div>
+        <div class="kpi-sub">7,420,000 × 1.2회 × 20원 × 12</div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ══ 템플릿 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <span class="section-title">거래기반 메시지 템플릿 5종</span>
+      <span class="section-badge">법적 요건: 동일 재화/서비스 준수</span>
+    </div>
+
+    <div class="template-grid">
+      <div class="tpl-card">
+        <div class="tpl-num">템플릿 1</div>
+        <div class="tpl-name">재구매 쿠폰</div>
+        <div class="tpl-time">구매 후 D+30 / D+60</div>
+        <div class="tpl-desc">구매한 상품과 동일 카테고리 재구매 유도. 쿠폰 첨부 가능. 가장 범용적 — 전 업종 적용 가능.</div>
+        <div class="tpl-ind">주요업종: 쇼핑·뷰티·외식 &nbsp;<span class="tpl-freq">월 1회</span></div>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-num">템플릿 2</div>
+        <div class="tpl-name">재방문/재예약 리마인더</div>
+        <div class="tpl-time">마지막 방문 후 재방문 주기 도래</div>
+        <div class="tpl-desc">업종별 재이용 주기(병원 6개월, 헤어 3주, 피트니스 30일) 기반 자동 발송. 거래기반 핵심 트리거.</div>
+        <div class="tpl-ind">주요업종: 병원·뷰티·여행 &nbsp;<span class="tpl-freq">월 0.8회</span></div>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-num">템플릿 3</div>
+        <div class="tpl-name">신상품/신메뉴 알림</div>
+        <div class="tpl-time">신상품 등록 시 즉시</div>
+        <div class="tpl-desc">구매 이력 있는 카테고리의 신상품 입고 안내. "이전에 구매한 상품과 같은 종류" 법적 조건 충족.</div>
+        <div class="tpl-ind">주요업종: 쇼핑·외식 &nbsp;<span class="tpl-freq">월 0.5회</span></div>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-num">템플릿 4</div>
+        <div class="tpl-name">시즌 프로모션</div>
+        <div class="tpl-time">분기 1~2회 (봄/여름/연말)</div>
+        <div class="tpl-desc">시즌 한정 할인/이벤트. 동일 재화 조건 내에서 특가 안내. SMB가 가장 직관적으로 활용 가능한 형태.</div>
+        <div class="tpl-ind">주요업종: 전 업종 &nbsp;<span class="tpl-freq">월 0.3회</span></div>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-num">템플릿 5</div>
+        <div class="tpl-name">리뷰 요청 + 혜택</div>
+        <div class="tpl-time">구매/방문 후 D+1~3</div>
+        <div class="tpl-desc">후기 작성 시 쿠폰 지급. 메시지 발송과 동시에 리뷰 인프라 강화. 재구매율 높은 업종 효과적.</div>
+        <div class="tpl-ind">주요업종: 쇼핑·숙박·외식 &nbsp;<span class="tpl-freq">월 0.5회</span></div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">템플릿별 발송 빈도 합산 → 채널당 월평균 예상 캠페인</div>
+      <div class="calc-chain">
+        템플릿1(1.0) <span class="op">+</span> 템플릿2(0.8) <span class="op">+</span> 템플릿3(0.5) <span class="op">+</span> 템플릿4(0.3) <span class="op">+</span> 템플릿5(0.5)
+        <span class="op">=</span> <em>3.1회/월</em> (전체 적용 시) &nbsp;|&nbsp;
+        실제 적용 채널 비율 고려 → <em>1.0~1.4회/월</em> 예상
+      </div>
+    </div>
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ══ 감소 요인 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <span class="section-title">주요 감소 요인 및 적용 배수</span>
+    </div>
+
+    <table class="factor-table">
+      <thead>
+        <tr>
+          <th style="width:18%">감소 요인</th>
+          <th style="width:12%">적용 배수</th>
+          <th>상세 근거</th>
+          <th style="width:12%">데이터 출처</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="factor-name">① 6개월 이내 구매자 비율<br><span style="font-size:10px;color:#555">(법적 TTL 제한)</span></td>
+          <td class="factor-val">× 0.62</td>
+          <td>
+            정통망법 제50조: 거래 종료일로부터 <strong>6개월 이내</strong>만 발송 가능.<br>
+            <strong>실측:</strong> 체크아웃 49.8% / 예약 50.4% / 스토어 69.5% → 구매자수 가중평균 <strong>62.4%</strong><br>
+            (스토어 구매자 비중이 커 전체 평균이 끌어올려짐)
+            <span class="tag-data">실측</span>
+          </td>
+          <td>tableau_checkout /<br>booking_v2 /<br>fact_talkstore</td>
+        </tr>
+        <tr>
+          <td class="factor-name">② 동일 재화 조건<br>충족 채널 비율</td>
+          <td class="factor-val">× 0.75</td>
+          <td>
+            5종 템플릿 중 각 채널이 적용 가능한 템플릿 보유 비율 추정.<br>
+            업종별 거래 빈도·상품 다양성에 따라 다름. 쇼핑·뷰티·외식(3개 업종, 전체 발송채널의 67%)은 템플릿1~3 모두 적용 가능. 병원·IT·교육(28%)은 템플릿2·4 위주 — 조건 다소 제한.<br>
+            가중 적용 시 약 <strong>75%</strong> 채널이 1개 이상 템플릿 사용 가능.
+            <span class="tag-est">추정</span>
+          </td>
+          <td>업종별 발송채널 분포<br>(adaccount_all)</td>
+        </tr>
+        <tr>
+          <td class="factor-name">③ 채널 차단율<br>(발송 후 D+7 차단)</td>
+          <td class="factor-val">× 0.966</td>
+          <td>
+            카비센 발송 수신자 기준 D+7 이내 동일 채널 차단율 <strong>실측</strong>.<br>
+            2026-04 카비센 발송 unique 수신자 <strong>3,602만명</strong> 중 D+7 내 동일 채널 차단: <strong>121만명(3.4%)</strong>.<br>
+            → 발송 1,000건당 약 <strong>33.8건</strong> 차단. 비친구 첫 발송 시 차단율 추가 증가 가능하나 현재 실측치 적용 → ×0.966
+            <span class="tag-data">실측 (plusfriend_access D+7, 2026-04)</span>
+          </td>
+          <td>plusfriend_access<br>bi_lake 2026-04</td>
+        </tr>
+        <tr>
+          <td class="factor-name">④ 발송 참여 채널 비율<br>(미발송 채널 진입)</td>
+          <td class="factor-val">× 1.0</td>
+          <td>
+            현재 베이스라인은 이미 카비센 유상 발송 중인 <strong>17,134채널 기준</strong>이므로 별도 감소 불필요.<br>
+            (미발송 채널의 신규 진입은 별도 증가 시나리오로 분리)
+            <span class="tag-data">실측</span>
+          </td>
+          <td>adaccount_all</td>
+        </tr>
+        <tr>
+          <td class="factor-name">⑤ 발송 빈도<br>(시나리오별 캠페인수)</td>
+          <td class="factor-val">1.0~1.4회</td>
+          <td>
+            현재 서비스연동 카비센채널 실측: <strong>0.7회/월</strong> (12개월 전체 기준) / <strong>1.0회/월</strong> (발송 활성 월 기준).<br>
+            거래기반 도입 시 구매 트리거(재구매·리마인더·신상품) 추가로 발송 기회 증가 예상.<br>
+            보수: <em>1.0회</em> (현재 활성월 실측치 유지) / 중간: <em>1.2회</em> / 낙관: <em>1.4회</em>
+            <span class="tag-data">실측 + 추정 (plusfriend_send_msg 2025-05~2026-05)</span>
+          </td>
+          <td>plusfriend_send_msg<br>adaccount_all</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ══ 시나리오 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <span class="section-title">시나리오별 연간 기대매출</span>
+    </div>
+
+    <!-- 계산 구조 -->
+    <div class="box" style="margin-bottom:16px;">
+      <div class="box-title">계산 구조 — 공통 공식</div>
+      <div class="calc-chain">
+        기대매출 = <em>비친구 모수(742만)</em>
+        <span class="op">×</span> <em>6개월 TTL(×0.62)</em>
+        <span class="op">×</span> <em>동일재화 적용률</em>
+        <span class="op">×</span> <em>차단율(×0.966)</em>
+        <span class="op">×</span> <em>월캠페인수</em>
+        <span class="op">×</span> 20원
+        <span class="op">×</span> 12개월
+      </div>
+    </div>
+
+    <div class="scenario-grid">
+      <!-- 보수 -->
+      <div class="scenario-card base">
+        <div class="sc-label c-base">▸ 보수적 시나리오</div>
+        <div class="sc-val c-base">약 6억</div>
+        <div class="sc-sub">현재 카비센 채널 한정 / 낮은 참여율</div>
+        <div class="sc-detail">
+          비친구 모수: <em>742만명</em><br>
+          × TTL(6개월): <em>×0.62 = 460만</em><br>
+          × 동일재화 적용: <em>×0.70 = 322만</em><br>
+          × 차단율: <em>×0.966 = 311만</em><br>
+          × 월 0.8회 × 20원 × 12개월<br>
+          = <em style="color:#888">약 6.0억</em><br><br>
+          <em>가정:</em> 동일재화 70%<br>
+          템플릿 1~2종만 활용, 자동화 없음
+        </div>
+      </div>
+
+      <!-- 중간 -->
+      <div class="scenario-card mid">
+        <div class="sc-label c-mid">▸ 중간 시나리오 (현실적)</div>
+        <div class="sc-val c-mid">약 8억</div>
+        <div class="sc-sub">5종 템플릿 활용 / 발송빈도 현실화</div>
+        <div class="sc-detail">
+          비친구 모수: <em>742만명</em><br>
+          × TTL(6개월): <em>×0.62 = 460만</em><br>
+          × 동일재화 적용: <em>×0.75 = 345만</em><br>
+          × 차단율: <em>×0.966 = 333만</em><br>
+          × 월 1.0회 × 20원 × 12개월<br>
+          = <em>약 8.0억</em><br><br>
+          <em>가정:</em> 동일재화 75%<br>
+          템플릿 1~3 활용, Phase1 수동 발송
+        </div>
+      </div>
+
+      <!-- 낙관 -->
+      <div class="scenario-card opt">
+        <div class="sc-label c-opt">▸ 낙관 시나리오</div>
+        <div class="sc-val c-opt">약 10.2억</div>
+        <div class="sc-sub">5종 템플릿 전체 활용 / 발송빈도 최대</div>
+        <div class="sc-detail">
+          비친구 모수: <em>742만명</em><br>
+          × TTL(6개월): <em>×0.62 = 460만</em><br>
+          × 동일재화 적용: <em>×0.80 = 368만</em><br>
+          × 차단율: <em>×0.966 = 355만</em><br>
+          × 월 1.2회 × 20원 × 12개월<br>
+          = <em style="color:#69db7c">약 10.2억</em><br><br>
+          <em>가정:</em> 동일재화 80%, 템플릿 5종 전체<br>
+          단가 프리미엄(30원) 미적용 기준
+        </div>
+      </div>
+    </div>
+
+    <!-- 요약 비교 -->
+    <div class="box highlight">
+      <div class="box-title">시나리오별 핵심 변수 비교</div>
+      <table class="factor-table">
+        <thead>
+          <tr>
+            <th>변수</th>
+            <th>보수적</th>
+            <th>중간 (현실적)</th>
+            <th>낙관</th>
+            <th>근거</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="factor-name">6개월 TTL 적용</td>
+            <td>62%</td><td>62%</td><td>62%</td>
+            <td><em>실측</em>: 체크아웃 49.8% / 예약 50.4% / 스토어 69.5% → 가중평균 62%</td>
+          </tr>
+          <tr>
+            <td class="factor-name">동일재화 조건 충족률</td>
+            <td>70%</td><td>75%</td><td>80%</td>
+            <td>쇼핑·뷰티·외식(67%) 템플릿1~3 가능, 병원·IT 일부 제한</td>
+          </tr>
+          <tr>
+            <td class="factor-name">채널 차단율</td>
+            <td>3.4%</td><td>3.4%</td><td>3.4%</td>
+            <td><em>실측</em>: plusfriend_access D+7 기준 3.4% (2026-04, 3,602만 수신자 중 121만 차단)</td>
+          </tr>
+          <tr>
+            <td class="factor-name">월평균 캠페인수</td>
+            <td>0.8회</td><td>1.0회</td><td>1.2회</td>
+            <td><em>실측</em>: 서비스연동 채널 0.7회(전체 기준) / 1.0회(활성월 기준). 거래기반 트리거 추가 시 1.2~1.4회 예상</td>
+          </tr>
+          <tr>
+            <td class="factor-name factor-base">연간 기대매출</td>
+            <td class="factor-val" style="color:#888">약 6억</td>
+            <td class="factor-val">약 8억</td>
+            <td class="factor-val" style="color:#69db7c">약 10억</td>
+            <td>발송건수 기준 과금 · 열람률 미적용</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ 추가 성장 레버 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <span class="section-title">중장기 성장 레버 (미반영)</span>
+    </div>
+    <div class="kpi-row kpi-3">
+      <div class="kpi">
+        <div class="kpi-lbl">비친구 전용 단가 인상</div>
+        <div class="kpi-val">+50~75%</div>
+        <div class="kpi-sub">20원 → 30~35원 시 매출 직접 비례 증가<br>비친구 도달 희소성 프리미엄</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">서비스 연동 확장</div>
+        <div class="kpi-val">+수억</div>
+        <div class="kpi-sub">카카오맵 예약·배달앱 등 연동 확대 시<br>비친구 모수 자연 증가</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">비친구 → 친구 전환 선순환</div>
+        <div class="kpi-val">장기효과</div>
+        <div class="kpi-sub">발송 후 친구 추가 유도 CTA →<br>다음 발송부터 비용 절감(비친구→친구)</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ══ 추가 변수 ══ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <span class="section-title">추가 변수 요인</span>
+      <span class="section-badge">기존 분석에서 미반영</span>
+    </div>
+
+    <div class="kpi-row kpi-3">
+      <div class="box">
+        <div class="box-title">+ 미발송 채널 진입 효과</div>
+        <ul class="fact-list">
+          <li><span class="fact-icon">+</span><span>거래 있는 미발송 채널 <em>78,260개</em>가 거래기반으로 첫 발송 시작<br>전환율 5% 가정 → 3,913채널 × 비친구 × 20원 × 12 = <em>+수십억 추가</em></span></li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="box-title">+ Phase2 자동 트리거</div>
+        <ul class="fact-list">
+          <li><span class="fact-icon">+</span><span>수동 발송 → 자동 트리거(D+30 재구매, D+N 리마인더) 전환 시<br>채널당 발송 빈도 <em>2~3배</em> 증가 가능</span></li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="box-title">+ 단가 프리미엄</div>
+        <ul class="fact-list">
+          <li><span class="fact-icon">+</span><span>비친구 발송은 추가 비용 부담(080 당사 부담) 감안,<br>추후 비친구 전용 단가 <em>30~35원</em> 설정 가능 → 매출 1.5~1.75배</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="kpi-row kpi-3">
+      <div class="box">
+        <div class="box-title">− 비친구 발송 후 친구 전환</div>
+        <ul class="fact-list">
+          <li><span class="fact-icon">−</span><span>비친구가 메시지 수신 후 채널 추가 → 친구 전환 시<br>다음 발송부터 모수에서 제외(비친구 풀 감소)<br>친구 전환율 약 <em>1~3%</em> 가정</span></li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="box-title">− 법적 리스크 채널</div>
+        <ul class="fact-list">
+          <li><span class="fact-icon">−</span><span>카카오 통합 약관의 "직접 연락처 수집" 해석이<br>채널별 상이할 수 있음 → 일부 채널 미참여 가능<br>추정 제외율 <em>5~10%</em></span></li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="box-title">− 6개월 TTL 감소</div>
+        <ul class="fact-list">
+          <li><span class="fact-icon">−</span><span>운영 기간이 길어질수록 6개월 초과 구매자 비중 증가<br>→ 신규 구매 발생 없는 채널은 모수 자연 감소<br>연간 약 <em>10~15%</em> 모수 감소 예상</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-bar">
+    <strong>채널메시지 매출 범위:</strong> adaccount_all product='톡채널메시지' 한정 (모먼트·알림톡 제외) — 전체 87,009채널 7,817억 중 서비스연동 17,134채널 <em>1,606억</em>이 거래기반 대상 &nbsp;|&nbsp;
+    <strong>베이스라인 21억:</strong> 서비스연동 채널의 비친구 742만명 대상 증분 매출 추정 (기존 1,606억과 별개) &nbsp;|&nbsp;
+    <strong>6개월 TTL 실측:</strong> 체크아웃 49.8% / 예약 50.4% / 스토어 69.5% → 가중평균 62% &nbsp;|&nbsp;
+    <strong>차단율:</strong> 3.4% 실측 (plusfriend_access D+7 기준, 2026-04 카비센 발송 3,602만 수신자 대상) &nbsp;|&nbsp;
+    <strong>열람률 참고:</strong> viewable 47% / CTR 4.7% 실측 — 매출은 발송건수 기준 과금이므로 감소요인 미적용
+  </div>
+
+</div>
+</body>
+</html>
