@@ -26,6 +26,7 @@
 
   body {
     font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    color: #F0F0F0;
     background: #0A0A0A;
     display: flex;
     justify-content: center;
@@ -141,6 +142,8 @@
   .orange { color: var(--orange); }
   .bold { font-weight: 700; }
   .sm { font-size: 12px; color: var(--sub); }
+  strong { color: inherit; }
+  b { color: inherit; }
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
@@ -472,7 +475,7 @@
           <div class="label">전체 비즈채널 (2026-04)</div>
         </div>
         <div class="kpi">
-          <div class="num" style="color:var(--accent)">83.9%</div>
+          <div class="num" style="color:#FF7A50">83.9%</div>
           <div class="label">월 메시지 미발송 채널<br>639,980개</div>
         </div>
         <div class="kpi">
@@ -512,7 +515,7 @@
               </tr>
               <tr style="background:#2A1A00">
                 <td class="left" colspan="3"><strong>발송량 격차</strong></td>
-                <td style="color:var(--accent);font-weight:800;font-size:15px">148배</td>
+                <td style="color:#FF7A50;font-weight:800;font-size:15px">148배</td>
               </tr>
             </tbody>
           </table>
@@ -527,22 +530,22 @@
           <div style="font-size:13px;line-height:1.9">
             <div style="margin-bottom:10px">
               <span style="background:#2A0A0A;color:#FF7070;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">원인 1</span>
-              <strong style="margin-left:8px">발송 루틴 없음</strong><br>
+              <strong style="margin-left:8px;color:#F0F0F0">발송 루틴 없음</strong><br>
               <span style="color:#888;padding-left:16px;display:block">매번 수동 작성 → 작성 포기 → 미발송 악순환</span>
             </div>
             <div style="margin-bottom:10px">
               <span style="background:#2A0A0A;color:#FF7070;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">원인 2</span>
-              <strong style="margin-left:8px">친구수 절대 부족</strong><br>
+              <strong style="margin-left:8px;color:#F0F0F0">친구수 절대 부족</strong><br>
               <span style="color:#888;padding-left:16px;display:block">중앙값 친구 수 582명 → 월 발송 시 약 1.2만원 수익 → ROI 無</span>
             </div>
             <div style="margin-bottom:10px">
               <span style="background:#2A0A0A;color:#FF7070;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">원인 3</span>
-              <strong style="margin-left:8px">자동화 도구 없음</strong><br>
+              <strong style="margin-left:8px;color:#F0F0F0">자동화 도구 없음</strong><br>
               <span style="color:#888;padding-left:16px;display:block">SDK·CRM 연동 없이는 트리거 발송 불가</span>
             </div>
             <div>
               <span style="background:#2A0A0A;color:#FF7070;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">원인 4</span>
-              <strong style="margin-left:8px">검수 대기 부담</strong><br>
+              <strong style="margin-left:8px;color:#F0F0F0">검수 대기 부담</strong><br>
               <span style="color:#888;padding-left:16px;display:block">발송 1회에 평균 1~2 영업일 검수 대기</span>
             </div>
           </div>
@@ -585,9 +588,9 @@
             <tbody>
               <tr><td>0명</td><td>214,123</td><td style="color:#888">0.0%</td><td>4,388</td></tr>
               <tr><td>1~99명</td><td>348,348</td><td>0.7%</td><td>55,695</td></tr>
-              <tr style="background:#2A1A00"><td style="font-weight:700;color:var(--orange)">100~999명</td><td style="font-weight:700">133,571</td><td style="color:#FF7A50;font-weight:700">8.1%</td><td>58,896</td></tr>
-              <tr style="background:#2A1A00"><td style="font-weight:700;color:var(--orange)">1천~9,999명</td><td style="font-weight:700">53,693</td><td style="color:#FF7A50;font-weight:700">20.3%</td><td>35,363</td></tr>
-              <tr style="background:#2A1A00"><td style="font-weight:700;color:var(--orange)">1만~9.9만명</td><td style="font-weight:700">11,139</td><td style="color:#5B9BF8;font-weight:700">26.2%</td><td>8,454</td></tr>
+              <tr style="background:#2A1A00"><td style="font-weight:700;color:var(--orange)">100~999명</td><td style="font-weight:700;color:#FFA940">133,571</td><td style="color:#FF7A50;font-weight:700">8.1%</td><td>58,896</td></tr>
+              <tr style="background:#2A1A00"><td style="font-weight:700;color:var(--orange)">1천~9,999명</td><td style="font-weight:700;color:#FFA940">53,693</td><td style="color:#FF7A50;font-weight:700">20.3%</td><td>35,363</td></tr>
+              <tr style="background:#2A1A00"><td style="font-weight:700;color:var(--orange)">1만~9.9만명</td><td style="font-weight:700;color:#FFA940">11,139</td><td style="color:#5B9BF8;font-weight:700">26.2%</td><td>8,454</td></tr>
               <tr><td>10만명+</td><td>2,167</td><td>16.4%</td><td>1,666</td></tr>
             </tbody>
           </table>
@@ -604,7 +607,7 @@
           <div style="flex:1">
             <strong>0명·1~99명 구간</strong>은 친구 모집 자체가 선결 과제 (CRM 효과 無)<br>
             <strong>10만명+ 구간</strong>은 이미 SDK·모먼트 자동화 활용 중<br>
-            → 중간 구간이 Native CRM의 <strong style="color:var(--accent)">유일한 공략 가능 미개척지</strong>
+            → 중간 구간이 Native CRM의 <strong style="color:#FF7A50">유일한 공략 가능 미개척지</strong>
           </div>
         </div>
       </div>
@@ -877,7 +880,7 @@
               <td style="color:var(--blue)">Phase 3</td>
             </tr>
             <tr style="background:#2A0A15">
-              <td rowspan="2" style="font-weight:700;color:var(--accent)">이탈케어</td>
+              <td rowspan="2" style="font-weight:700;color:#FF7A50">이탈케어</td>
               <td class="left">이탈케어 1단계</td>
               <td class="left">6개월 미열람/미클릭</td>
               <td><span class="chip chip-paid">15원</span></td>
@@ -1020,7 +1023,7 @@
                   <td><span class="chip chip-paid">15원</span></td>
                 </tr>
                 <tr style="background:#2A0A15">
-                  <td style="font-weight:700;color:var(--accent)">2단계</td>
+                  <td style="font-weight:700;color:#FF7A50">2단계</td>
                   <td class="left">친구추가 12개월 후<br>미열람/미클릭</td>
                   <td class="left">"고객님께만 드리는 50% 시크릿 쿠폰"</td>
                   <td><span class="chip chip-paid">15원</span></td>
@@ -1036,7 +1039,7 @@
               <tbody>
                 <tr><td class="left">월렛 보유 채널</td><td>164,462개</td><td></td></tr>
                 <tr><td class="left">월 미발송 채널</td><td>≈137,000개</td><td style="color:#888">-83%</td></tr>
-                <tr style="background:#2A0A15"><td class="left" style="font-weight:700">6개월+ 미반응 추정</td><td style="font-weight:700;color:var(--accent)">≈80,000개</td><td style="font-weight:700">이탈케어 대상</td></tr>
+                <tr style="background:#2A0A15"><td class="left" style="font-weight:700">6개월+ 미반응 추정</td><td style="font-weight:700;color:#FF7A50">≈80,000개</td><td style="font-weight:700;color:#FFA940">이탈케어 대상</td></tr>
               </tbody>
             </table>
           </div>
@@ -1047,7 +1050,7 @@
               <thead><tr><th>시나리오</th><th>산식</th><th>월 추가 매출</th></tr></thead>
               <tbody>
                 <tr><td>보수 (5%)</td><td class="left" style="font-size:11px">80K채널×500명×15원</td><td>6억</td></tr>
-                <tr style="background:#2A1A00"><td style="font-weight:700">기본 (10%)</td><td class="left" style="font-size:11px">80K채널×1,000명×15원</td><td style="font-weight:700;color:var(--orange)">12억</td></tr>
+                <tr style="background:#2A1A00"><td style="font-weight:700;color:#FFA940">기본 (10%)</td><td class="left" style="font-size:11px">80K채널×1,000명×15원</td><td style="font-weight:700;color:var(--orange)">12억</td></tr>
                 <tr><td>공격 (20%)</td><td class="left" style="font-size:11px">80K채널×2,000명×15원</td><td>24억</td></tr>
               </tbody>
             </table>
@@ -1091,7 +1094,7 @@
                 이탈케어 종료
               </div>
               <div class="flow-branch-item" style="border-color:#6d1a1a;background:#2A0A15">
-                <strong style="color:var(--accent)">반응 X</strong><br>
+                <strong style="color:#FF7A50">반응 X</strong><br>
                 자동 발송 중단<br>(수신거부 방지)
               </div>
             </div>
@@ -1148,7 +1151,7 @@
               <thead><tr><th>친구 수</th><th>월 1회 발송</th><th>연 비용</th></tr></thead>
               <tbody>
                 <tr><td>1,000명</td><td>15,000원</td><td>180,000원</td></tr>
-                <tr style="background:#2A1A00"><td style="font-weight:700">10,000명</td><td style="font-weight:700">150,000원</td><td style="font-weight:700">1,800,000원</td></tr>
+                <tr style="background:#2A1A00"><td style="font-weight:700;color:#FFA940">10,000명</td><td style="font-weight:700;color:#FFA940">150,000원</td><td style="font-weight:700;color:#FFA940">1,800,000원</td></tr>
                 <tr><td>100,000명</td><td>1,500,000원</td><td>18,000,000원</td></tr>
               </tbody>
             </table>
@@ -1225,7 +1228,7 @@
 
       <div class="two-col" style="margin-bottom:14px">
         <div class="card">
-          <div class="card-title" style="color:var(--accent)">As-Is — 수동 발송 (매번 반복)</div>
+          <div class="card-title" style="color:#FF7A50">As-Is — 수동 발송 (매번 반복)</div>
           <table class="tbl">
             <thead><tr><th>#</th><th>단계</th><th>부담 요소</th></tr></thead>
             <tbody>
@@ -1404,17 +1407,17 @@
                 <tr>
                   <td>보수 (5%)</td>
                   <td>0.9억</td><td>0.9억</td><td>0.9억</td>
-                  <td style="font-weight:700">2.7억</td>
+                  <td style="font-weight:700;color:#FFA940">2.7억</td>
                 </tr>
                 <tr style="background:#2A1A00">
-                  <td style="font-weight:700">기본 (10%)</td>
+                  <td style="font-weight:700;color:#FFA940">기본 (10%)</td>
                   <td>1.8억</td><td>1.8억</td><td>1.8억</td>
                   <td style="font-weight:700;color:var(--orange)">5.4억</td>
                 </tr>
                 <tr>
                   <td>공격 (20%)</td>
                   <td>3.6억</td><td>3.6억</td><td>3.6억</td>
-                  <td style="font-weight:700;color:var(--accent)">10.8억</td>
+                  <td style="font-weight:700;color:#FF7A50">10.8억</td>
                 </tr>
               </tbody>
             </table>
@@ -1492,15 +1495,15 @@
           </thead>
           <tbody>
             <tr>
-              <td class="left" style="color:var(--accent)">자동 발송에 대한 비용 우려</td>
+              <td class="left" style="color:#FF7A50">자동 발송에 대한 비용 우려</td>
               <td class="left">① 저렴한 단가(알림톡 수준 15원) ② 비용 시뮬레이터(상한선) ③ 발송 전 미리보기</td>
             </tr>
             <tr>
-              <td class="left" style="color:var(--accent)">CRM 메시지 성과 불확실</td>
+              <td class="left" style="color:#FF7A50">CRM 메시지 성과 불확실</td>
               <td class="left">① 점진적 CRM 메시지 확장 추천 ② 메시지 성과 대시보드 ③ 동종 업계 파트너 성과 벤치마크</td>
             </tr>
             <tr>
-              <td class="left" style="color:var(--accent)">세팅에 대한 번거로움</td>
+              <td class="left" style="color:#FF7A50">세팅에 대한 번거로움</td>
               <td class="left">① 업종 선택 원클릭 템플릿 자동 세팅 ② 웰컴·이탈케어 기본값 제공 ③ 최초 1회 설정 후 자동 반복</td>
             </tr>
           </tbody>
@@ -1782,7 +1785,7 @@
             <tr>
               <td class="left"><strong>기존 Native CRM</strong></td>
               <td class="left">친구 추가 / 메시지 미반응</td>
-              <td style="font-weight:700">4개 트리거 / 9개 시나리오</td>
+              <td style="font-weight:700;color:#FFA940">4개 트리거 / 9개 시나리오</td>
               <td class="left">채널 메시지 반응 로그</td>
             </tr>
             <tr style="background:#0A2010">
@@ -1818,8 +1821,8 @@
                 <tr><td class="left">카비센 OLS 소식 작성 비중</td><td style="font-weight:700;color:var(--blue)">61.6%</td></tr>
                 <tr><td class="left">소식 작성 후 3일 내 메시지 발송</td><td style="font-weight:700;color:var(--green)">58.5%</td></tr>
                 <tr><td class="left">예약하기 연동 채널 소식률</td><td style="font-weight:700;color:var(--blue)">77.1%</td></tr>
-                <tr><td class="left">병원 업종 소식 작성 비중</td><td style="font-weight:700">77.8%</td></tr>
-                <tr><td class="left">기관·단체 업종 소식 작성 비중</td><td style="font-weight:700">73.6%</td></tr>
+                <tr><td class="left">병원 업종 소식 작성 비중</td><td style="font-weight:700;color:#FFA940">77.8%</td></tr>
+                <tr><td class="left">기관·단체 업종 소식 작성 비중</td><td style="font-weight:700;color:#FFA940">73.6%</td></tr>
               </tbody>
             </table>
             <div class="insight" style="margin-top:10px">
@@ -1952,7 +1955,7 @@
         <!-- 예약하기 -->
         <div style="display:flex;flex-direction:column;gap:12px">
           <div class="card">
-            <div class="card-title" style="color:var(--accent)">📅 예약하기 트리거</div>
+            <div class="card-title" style="color:#FF7A50">📅 예약하기 트리거</div>
             <table class="tbl">
               <thead><tr><th>트리거</th><th>발송 내용</th><th>과금</th></tr></thead>
               <tbody>
@@ -2111,7 +2114,7 @@
                 <tr><td class="left">카비센 채팅 ON 비율</td><td style="font-weight:700;color:var(--green)">70.0%</td></tr>
                 <tr><td class="left">실제 1:1 채팅 실시 비율</td><td style="font-weight:700;color:var(--green)">68.8%</td></tr>
                 <tr><td class="left">카비센 vs 모먼트 채팅 실시 격차</td><td style="font-weight:700;color:var(--blue)">+32.7%p</td></tr>
-                <tr><td class="left">챗봇 설정 보유율</td><td style="font-weight:700">19.5%</td></tr>
+                <tr><td class="left">챗봇 설정 보유율</td><td style="font-weight:700;color:#FFA940">19.5%</td></tr>
               </tbody>
             </table>
             <div class="insight" style="margin-top:10px">
@@ -2518,24 +2521,24 @@
                 <td class="left" style="font-size:11px">Phase 2</td>
               </tr>
               <tr style="background:#2A0A15">
-                <td class="left" style="font-weight:700;color:var(--accent)">예약 트리거</td>
+                <td class="left" style="font-weight:700;color:#FF7A50">예약 트리거</td>
                 <td>5K채널</td>
                 <td>0.4억</td>
-                <td style="font-weight:700;color:var(--accent)">0.8억</td>
+                <td style="font-weight:700;color:#FF7A50">0.8억</td>
                 <td class="left" style="font-size:11px">Phase 2</td>
               </tr>
               <tr style="background:#2A1500">
                 <td class="left" style="font-weight:700;color:var(--blue)">체크아웃 트리거</td>
                 <td>5K채널</td>
                 <td>0.4억</td>
-                <td style="font-weight:700">0.8억</td>
+                <td style="font-weight:700;color:#FFA940">0.8억</td>
                 <td class="left" style="font-size:11px">Phase 2</td>
               </tr>
               <tr style="background:#1E1E1E;font-weight:700">
                 <td class="left">합계 (Phase 2 완성 시)</td>
                 <td>—</td>
                 <td>6.3억</td>
-                <td style="color:var(--accent);font-size:15px">12.7억+</td>
+                <td style="color:#FF7A50;font-size:15px">12.7억+</td>
                 <td class="left" style="font-size:11px">현재 월매출 224.9억 대비 순증</td>
               </tr>
             </tbody>
@@ -2570,7 +2573,7 @@
           <div class="card">
             <div class="card-title">Native CRM 2.0이 만드는 변화</div>
             <div style="font-size:13px;line-height:2">
-              <span style="color:var(--accent)">Before</span> 메시지 발송 = 파트너가 직접 작성·검수·발송<br>
+              <span style="color:#FF7A50">Before</span> 메시지 발송 = 파트너가 직접 작성·검수·발송<br>
               <span style="color:#3ECF6C;font-weight:700">After</span> &nbsp; 채널 운영 행동 자체가 자동 CRM 실행<br>
               <br>
               소식 작성 → 알림 자동 발송<br>
