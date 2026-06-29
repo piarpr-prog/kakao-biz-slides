@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>채널기능 활성도 — 카비센 vs 모먼트 (25-05~26-04)</title>
+<style>
+  :root {
+    --bg:      #1A1A1A;
+    --card:    #242424;
+    --card2:   #1E1E1E;
+    --border:  #333;
+    --yellow:  #FEE500;
+    --orange:  #FFA940;
+    --red:     #FF7A50;
+    --green:   #3ECF6C;
+    --blue:    #5B9BF8;
+    --purple:  #A78BFA;
+    --white:   #F0F0F0;
+    --gray:    #888;
+    --dim:     #555;
+    --insight-bg: #1E1A00;
+    --insight-tx: #E0D080;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    background: #0A0A0A;
+    color: var(--white);
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* ── 헤더 ── */
+  .page-header {
+    background: #0D0D0D;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 32px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 800; color: var(--white); }
+  .page-header .meta { font-size: 13px; color: var(--gray); }
+  .badge {
+    background: var(--yellow); color: #111;
+    font-size: 10px; font-weight: 800;
+    padding: 3px 10px; border-radius: 20px;
+    letter-spacing: .05em;
+  }
+
+  /* ── 카드 ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 700;
+    color: var(--gray); letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+
+  /* ── KPI 행 ── */
+  .kpi-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+  .kpi {
+    flex: 1; min-width: 140px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px; text-align: center;
+  }
+  .kpi .num { font-size: 24px; font-weight: 800; line-height: 1.1; }
+  .kpi .lbl { font-size: 11px; color: var(--gray); margin-top: 5px; }
+
+  /* ── 메인 비교표 ── */
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cmp-table th {
+    background: var(--card2); padding: 10px 14px;
+    border: 1px solid var(--border); font-weight: 700;
+    color: var(--gray); font-size: 11px; text-align: center;
+    white-space: nowrap;
+  }
+  .cmp-table th.kbs-col { color: var(--yellow); }
+  .cmp-table th.mom-col { color: var(--blue); }
+  .cmp-table td {
+    padding: 10px 14px; border: 1px solid #2a2a2a;
+    vertical-align: middle; color: var(--white);
+  }
+  .cmp-table td.feat { font-weight: 600; color: var(--white); }
+  .cmp-table td.type-tag {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+    white-space: nowrap; text-align: center;
+  }
+  .tag-direct { background: #1A2500; color: var(--green); }
+  .tag-setting { background: #0A1525; color: var(--blue); }
+  .tag-chat   { background: #1A0A25; color: var(--purple); }
+  .cmp-table td.num { text-align: center; font-weight: 700; }
+  .cmp-table td.kbs-val { color: var(--yellow); font-weight: 700; text-align: center; }
+  .cmp-table td.mom-val { color: var(--blue); font-weight: 700; text-align: center; }
+  .cmp-table .kbs-win { color: var(--green); font-weight: 800; text-align: center; }
+  .cmp-table .mom-win { color: var(--red);   font-weight: 800; text-align: center; }
+  .cmp-table tr:hover td { background: #2a2a2a; }
+  .section-row td {
+    background: #1a1a1a !important;
+    color: var(--gray); font-size: 10px;
+    font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 6px 14px;
+  }
+
+  /* ── 인사이트 박스 ── */
+  .insight {
+    background: var(--insight-bg);
+    border-left: 4px solid var(--yellow);
+    padding: 13px 16px; border-radius: 0 8px 8px 0;
+    font-size: 13px; line-height: 1.8;
+    color: var(--insight-tx); margin-top: 14px;
+  }
+  .insight strong { color: var(--yellow); }
+
+  /* ── 바 차트 셀 ── */
+  .bar-wrap { display: flex; align-items: center; gap: 6px; justify-content: center; }
+  .bar-bg { width: 64px; height: 7px; background: #333; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+
+  /* ── 세그먼트 카드 행 ── */
+  .seg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .seg-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px;
+  }
+  .seg-card .seg-name { font-size: 12px; font-weight: 700; color: var(--gray); margin-bottom: 4px; }
+  .seg-card .seg-cnt  { font-size: 22px; font-weight: 900; }
+  .seg-card .seg-sub  { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+  /* ── 범례 ── */
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── 두 컬럼 ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>채널기능 활성도 — 카비센 vs 모먼트</h1>
+  <span class="badge">분석 기간: 25-05 ~ 26-04</span>
+  <span class="meta">유상 채널메시지 발송채널 기준 | OLS+대행사 합산 가중평균</span>
+</div>
+
+<!-- KPI -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="num" style="color:var(--white)">80,697</div>
+    <div class="lbl">분석 대상 채널 (총합)</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:var(--yellow)">75,544</div>
+    <div class="lbl">카비센 채널<br>(OLS 73,239 + 대행사 2,305)</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:var(--blue)">5,153</div>
+    <div class="lbl">모먼트 채널<br>(OLS 1,635 + 대행사 3,518)</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:var(--green)">8개</div>
+    <div class="lbl">카비센 우위 기능</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:var(--red)">4개</div>
+    <div class="lbl">모먼트 우위 기능</div>
+  </div>
+</div>
+
+<!-- 메인 비교표 -->
+<div class="card">
+  <div class="card-title">카비센 평균 vs 모먼트 평균 — 기능 활성도 비교 (가중평균, %)</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>직접 액션</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>설정 기능</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>채팅 활동</div>
+  </div>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th style="width:180px;text-align:left">채널 기능</th>
+        <th style="width:80px">유형</th>
+        <th class="kbs-col" style="width:120px">카비센 평균<br><span style="font-size:10px;font-weight:400">(OLS+대행사)</span></th>
+        <th class="mom-col" style="width:120px">모먼트 평균<br><span style="font-size:10px;font-weight:400">(OLS+대행사)</span></th>
+        <th style="width:110px">차이</th>
+        <th style="width:80px">우위</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 직접 액션 -->
+      <tr class="section-row"><td colspan="6">── 직접 액션 ──</td></tr>
+      <tr>
+        <td class="feat">소식/게시글 작성</td>
+        <td><span class="type-tag tag-direct">직접액션</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:61.2%;background:var(--yellow)"></div></div>61.2%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:51.4%;background:var(--blue)"></div></div>51.4%</div>
+        </td>
+        <td class="kbs-win">+9.8%p ↑</td>
+        <td style="text-align:center;color:var(--green);font-size:11px;font-weight:700">KBS 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">쿠폰 발행</td>
+        <td><span class="type-tag tag-direct">직접액션</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:17.4%;background:var(--yellow)"></div></div>17.4%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:20.6%;background:var(--blue)"></div></div>20.6%</div>
+        </td>
+        <td class="mom-win">-3.2%p ↓</td>
+        <td style="text-align:center;color:var(--red);font-size:11px;font-weight:700">모먼트 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">마이스토어 소식</td>
+        <td><span class="type-tag tag-direct">직접액션</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:7.5%;background:var(--yellow)"></div></div>7.5%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:1.8%;background:var(--blue)"></div></div>1.8%</div>
+        </td>
+        <td class="kbs-win">+5.6%p ↑</td>
+        <td style="text-align:center;color:var(--green);font-size:11px;font-weight:700">KBS 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">마이스토어 쿠폰</td>
+        <td><span class="type-tag tag-direct">직접액션</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:8.1%;background:var(--yellow)"></div></div>8.1%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:2.8%;background:var(--blue)"></div></div>2.8%</div>
+        </td>
+        <td class="kbs-win">+5.3%p ↑</td>
+        <td style="text-align:center;color:var(--green);font-size:11px;font-weight:700">KBS 우위</td>
+      </tr>
+
+      <!-- 채팅 -->
+      <tr class="section-row"><td colspan="6">── 채팅 ──</td></tr>
+      <tr>
+        <td class="feat">채팅 ON</td>
+        <td><span class="type-tag tag-setting">설정기능</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:83.3%;background:var(--yellow)"></div></div>83.3%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:60.4%;background:var(--blue)"></div></div>60.4%</div>
+        </td>
+        <td class="kbs-win">+22.9%p ↑</td>
+        <td style="text-align:center;color:var(--green);font-size:11px;font-weight:700">KBS 우위</td>
+      </tr>
+      <tr>
+        <td class="feat" style="padding-left:20px">└ 실제 1:1 채팅 실시</td>
+        <td><span class="type-tag tag-chat">채팅활동</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:70.7%;background:var(--yellow)"></div></div>70.7%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:37.9%;background:var(--blue)"></div></div>37.9%</div>
+        </td>
+        <td class="kbs-win">+32.7%p ↑</td>
+        <td style="text-align:center;color:var(--green);font-size:11px;font-weight:700">KBS 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">챗봇 설정</td>
+        <td><span class="type-tag tag-setting">설정기능</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:28.5%;background:var(--yellow)"></div></div>28.5%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:16.7%;background:var(--blue)"></div></div>16.7%</div>
+        </td>
+        <td class="kbs-win">+11.8%p ↑</td>
+        <td style="text-align:center;color:var(--green);font-size:11px;font-weight:700">KBS 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">커스텀 채팅메뉴</td>
+        <td><span class="type-tag tag-setting">설정기능</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:12.1%;background:var(--yellow)"></div></div>12.1%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:18.1%;background:var(--blue)"></div></div>18.1%</div>
+        </td>
+        <td class="mom-win">-6.1%p ↓</td>
+        <td style="text-align:center;color:var(--red);font-size:11px;font-weight:700">모먼트 우위</td>
+      </tr>
+
+      <!-- 서비스 연동 -->
+      <tr class="section-row"><td colspan="6">── 서비스 연동 ──</td></tr>
+      <tr>
+        <td class="feat">톡체크아웃 연동</td>
+        <td><span class="type-tag tag-setting">설정기능</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:5.3%;background:var(--yellow)"></div></div>5.3%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:9.8%;background:var(--blue)"></div></div>9.8%</div>
+        </td>
+        <td class="mom-win">-4.5%p ↓</td>
+        <td style="text-align:center;color:var(--red);font-size:11px;font-weight:700">모먼트 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">예약하기 연동</td>
+        <td><span class="type-tag tag-setting">설정기능</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:7.7%;background:var(--yellow)"></div></div>7.7%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:10.1%;background:var(--blue)"></div></div>10.1%</div>
+        </td>
+        <td class="mom-win">-2.5%p ↓</td>
+        <td style="text-align:center;color:var(--red);font-size:11px;font-weight:700">모먼트 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">톡스토어 연동</td>
+        <td><span class="type-tag tag-setting">설정기능</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:8.4%;background:var(--yellow)"></div></div>8.4%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:21.4%;background:var(--blue)"></div></div>21.4%</div>
+        </td>
+        <td class="mom-win">-13.0%p ↓</td>
+        <td style="text-align:center;color:var(--red);font-size:11px;font-weight:700">모먼트 우위</td>
+      </tr>
+      <tr>
+        <td class="feat">마이스토어 보유</td>
+        <td><span class="type-tag tag-setting">설정기능</span></td>
+        <td class="kbs-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:34.5%;background:var(--yellow)"></div></div>34.5%</div>
+        </td>
+        <td class="mom-val">
+          <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:17.9%;background:var(--blue)"></div></div>17.9%</div>
+        </td>
+        <td class="kbs-win">+16.6%p ↑</td>
+        <td style="text-align:center;color:var(--green);font-size:11px;font-weight:700">KBS 우위</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="insight">
+    <strong>핵심 인사이트 (25-05~26-04)</strong><br>
+    카비센은 <strong>소식 작성 +9.8%p / 채팅 ON +22.9%p / 1:1채팅 실시 +32.7%p / 챗봇 +11.8%p</strong> — 콘텐츠 직접 운영·소통 기능에서 압도적 우위.<br>
+    모먼트는 <strong>톡스토어 -13.0%p / 커스텀메뉴 -6.1%p / 체크아웃 -4.5%p</strong> — 커머스·전환 연동 기능 중심.<br>
+    두 플랫폼의 <strong>운영 목적 자체가 다름</strong> → 카비센은 관계·콘텐츠, 모먼트는 퍼포먼스·전환.
+  </div>
+</div>
+
+<!-- 세그먼트별 채널수 -->
+<div class="card">
+  <div class="card-title">세그먼트별 채널 수 (25-05~26-04)</div>
+  <div class="seg-grid">
+    <div class="seg-card">
+      <div class="seg-name">카비센 OLS (직접 발송)</div>
+      <div class="seg-cnt" style="color:var(--yellow)">73,239개</div>
+      <div class="seg-sub">전체 분석 채널의 90.8%</div>
+    </div>
+    <div class="seg-card">
+      <div class="seg-name">카비센 대행사</div>
+      <div class="seg-cnt" style="color:var(--orange)">2,305개</div>
+      <div class="seg-sub">전체 분석 채널의 2.9%</div>
+    </div>
+    <div class="seg-card">
+      <div class="seg-name">모먼트 OLS</div>
+      <div class="seg-cnt" style="color:var(--blue)">1,635개</div>
+      <div class="seg-sub">전체 분석 채널의 2.0%</div>
+    </div>
+    <div class="seg-card">
+      <div class="seg-name">모먼트 대행사 (SDK)</div>
+      <div class="seg-cnt" style="color:var(--purple)">3,518개</div>
+      <div class="seg-sub">전체 분석 채널의 4.4% — 모먼트의 68.3%가 대행사</div>
+    </div>
+  </div>
+</div>
+
+<!-- 플랫폼 운영 목적 차이 요약 -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-title" style="color:var(--yellow)">카비센 (비즈파트너센터) — 관계·콘텐츠 중심</div>
+    <div style="font-size:13px;line-height:2.1">
+      ✦ 소식 작성 <strong style="color:var(--yellow)">61.2%</strong> — 직접 콘텐츠 생산<br>
+      ✦ 채팅 ON <strong style="color:var(--yellow)">83.3%</strong> — 고객 소통 창구<br>
+      ✦ 실제 채팅 실시 <strong style="color:var(--yellow)">70.7%</strong> — 직접 응대<br>
+      ✦ 챗봇 설정 <strong style="color:var(--yellow)">28.5%</strong> — 자동 응답 구축<br>
+      ✦ 마이스토어 보유 <strong style="color:var(--yellow)">34.5%</strong> — 매장 정보 관리<br>
+      <br>
+      <span style="color:var(--gray);font-size:12px">파트너가 직접 로그인해 운영 → 채널 관리 전반 적극 개입</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--blue)">모먼트 (카카오모먼트) — 전환·커머스 중심</div>
+    <div style="font-size:13px;line-height:2.1">
+      ✦ 톡스토어 연동 <strong style="color:var(--blue)">21.4%</strong> — 쇼핑 전환<br>
+      ✦ 커스텀 메뉴 <strong style="color:var(--blue)">18.1%</strong> — 구매 동선 최적화<br>
+      ✦ 체크아웃 연동 <strong style="color:var(--blue)">9.8%</strong> — 결제 전환<br>
+      ✦ 예약하기 연동 <strong style="color:var(--blue)">10.1%</strong> — 예약 전환<br>
+      ✦ 대행사 비율 <strong style="color:var(--blue)">68.3%</strong> — SDK 자동화 운영<br>
+      <br>
+      <span style="color:var(--gray);font-size:12px">대행사 + SDK로 자동화 → 퍼포먼스 광고 목적 집중</span>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:right;margin-top:12px;font-size:11px;color:var(--dim)">
+  2026.06 | 카카오 비즈니스 | 기간: 2025-05 ~ 2026-04
+</div>
+
+</body>
+</html>
